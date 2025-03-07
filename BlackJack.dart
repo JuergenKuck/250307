@@ -165,8 +165,6 @@ int EvalPlayingCard(String actor, List<String> cards, List<int> asses) {
     }
   }
 
-  bool isLost = false;
-
   if (pointsSum > 21) {
     if (asses[0] != 0) {
       pointsSum -= 10;
