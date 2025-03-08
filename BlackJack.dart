@@ -28,53 +28,46 @@ void main() {
 
 bool Game() {
   clearTerminal();
+  print('-----------------------');
   print('BlackJack - Spielbeginn');
-  print('-----------------------j');
+  print('-----------------------');
   List<String> suitSymbols = ['♠', '♥', '♦', '♣'];
 
   //Spielereinsatz
   // int bet = GetBet();
 
-  // Spieler erste Karte
-  int playerRank = GetRank();
-  List<String> playerCards = [rankMap.keys.elementAt(playerRank)];
-
-  // hier als List, weil in Function der Inhalt ggF. verändert wird
+  // Spieler Karten
+  List<String> playerCards = [];
+  // Spieler Asse; als List, weil in Function der Inhalt ggF. verändert wird
   List<int> playerAsses = [0];
-  if (playerCards[0] == 'Ass') playerAsses[0]++;
-  EvalPlayingCard('1. Karte Spieler', playerCards, playerAsses);
+  // Anzahl Spielerkarte
+  int playerNumberCard = 0;
 
-  // Bank 1. Karte
-  int bankRank = GetRank();
-  List<String> bankCards = [rankMap.keys.elementAt(bankRank)];
+  // Erste Karte Spieler
+  int playerPointsSum =
+      NextCard(++playerNumberCard, 'Spieler', playerCards, playerAsses);
+
+  // Bank: Kommentare analog Spieler
+  List<String> bankCards = [];
   List<int> bankAsses = [0];
-  if (bankCards[0] == 'Ass') bankAsses[0]++;
+  int bankNumberCard = 0;
 
-  EvalPlayingCard('1. Karte Bank   ', bankCards, bankAsses);
+  // Erste Karte Bank
+  int bankPointsSum =
+      NextCard(++bankNumberCard, 'Bank   ', bankCards, bankAsses);
+
   print('');
 
   // Spieler restliche Karten
   bool isFold = false;
   bool isPlayerLost = false;
 
-  int playerPointsSum = 0;
   while (!isFold && !isPlayerLost) {
-    playerCards.add(rankMap.keys.elementAt(GetRank()));
-    if (playerCards.last == 'Ass') playerAsses[0]++;
-    playerPointsSum = EvalPlayingCard('Spieler', playerCards, playerAsses);
+    playerPointsSum =
+        NextCard(++playerNumberCard, 'Spieler', playerCards, playerAsses);
     switch (playerPointsSum) {
       case < 21:
-        print("");
-        print("Möchtest Du noch eine Karte ziehen 'J'a oder 'N'ein?");
-        String drawCard = stdin.readLineSync() ?? 'J';
-        print('');
-        switch (drawCard) {
-          case 'N' || 'n':
-            isFold = true;
-          case 'J' || 'j':
-          default:
-            isFold = false;
-        }
+        isFold = !JaNein("Möchtest Du noch eine Karte ziehen?");
       case == 21:
         isFold = true; // bei 21 wirst Du keine mehr ziehen
       case > 21:
@@ -84,44 +77,37 @@ bool Game() {
         print('');
     }
   }
-  // bank
-  int bankPointsSum = 0;
-  isFold = false;
 
   if (!isPlayerLost) {
+    // Spieler noch nicht verloren => bank zieht Karten
+    isFold = false;
     print('');
     bool isBankLost = false;
     while (!isFold && !isBankLost) {
-      bankCards.add(rankMap.keys.elementAt(GetRank()));
-      if (bankCards.last == 'Ass') playerAsses[0]++;
-      bankPointsSum = EvalPlayingCard('Bank   ', bankCards, bankAsses);
+      bankPointsSum =
+          NextCard(++bankNumberCard, 'Bank   ', bankCards, bankAsses);
       isFold = bankPointsSum >= 17;
       isBankLost = bankPointsSum > 21;
     }
     bool isPlayerBlackJack = IsBlackJack(playerCards, playerPointsSum);
     bool isBankBlackJack = IsBlackJack(bankCards, bankPointsSum);
+
     print('');
     if (isBankLost)
       print('Herzlichen Glückwunsch. Die Bank hat sich überzogen!');
-
-    if (!isBankLost) {
+    else {
       if (playerPointsSum > bankPointsSum) {
         isBankLost = true;
         print(
             'Herzlichen Glückwunsch. Du hast mehr Punkte als die Bank und hast gewonnen!');
-      }
-      if (isPlayerBlackJack && !isBankBlackJack) {
-        isBankLost = true;
-        print('Herzlichen Glückwunsch. Du hast mit BlackJack gewonnen!');
-      }
-    }
-    if (!isBankLost) {
-      if (bankPointsSum > playerPointsSum) {
+      } else if (playerPointsSum < bankPointsSum) {
         isPlayerLost = true;
         print(
             "Schade! Du hast weniger Punkte als die Bank und leider verloren!");
-      }
-      if (isBankBlackJack && !isPlayerBlackJack) {
+      } else if (isPlayerBlackJack && !isBankBlackJack) {
+        isBankLost = true;
+        print('Herzlichen Glückwunsch. Du hast mit BlackJack gewonnen!');
+      } else if (isBankBlackJack && !isPlayerBlackJack) {
         isPlayerLost = true;
         print("Schade! Die Bank hat mit BlackJack gewonnen!");
       }
@@ -130,31 +116,19 @@ bool Game() {
       print("Noch mal gutgegangen! Ihr habt unentschieden gespielt!");
     }
   }
-  print('');
+  print('-----------------------');
+  print('BlackJack - Spielende');
+  print('-----------------------');
 
-  bool isNewGame = false;
-  print("");
-  print("Möchtest Du noch ein Spiel machen 'J'a oder 'N'ein?");
-  String isNewGameStr = stdin.readLineSync() ?? 'J';
-  print('');
-  switch (isNewGameStr) {
-    case 'N' || 'n':
-      isNewGame = false;
-    case 'J' || 'j':
-    default:
-      isNewGame = true;
-  }
-  return isNewGame;
+  return JaNein("Möchtest Du noch ein Spiel machen?");
 }
 
-int GetRank() {
-  Random random = Random();
-  int result = random.nextInt(13);
-  return result;
-}
+int NextCard(
+    int numberCard, String actor, List<String> cards, List<int> asses) {
+  cards.add(rankMap.keys.elementAt(GetRank()));
+  if (cards.last == 'Ass') asses[0]++;
 
-int EvalPlayingCard(String actor, List<String> cards, List<int> asses) {
-  String printCards = "$actor: ";
+  String printCards = "$numberCard Karte $actor: ";
   int pointsSum = 0;
 
   for (int i = 0; i < cards.length; i++) {
@@ -178,8 +152,31 @@ int EvalPlayingCard(String actor, List<String> cards, List<int> asses) {
   return pointsSum;
 }
 
+int GetRank() {
+  Random random = Random();
+  int result = random.nextInt(13);
+  return result;
+}
+
 bool IsBlackJack(List<String> cards, int pointsSum) {
   return cards.length == 2 && pointsSum == 21;
+}
+
+bool JaNein(String header) {
+  print('');
+  print("$header 'J'a oder 'N'ein?");
+
+  String answerStr = stdin.readLineSync() ?? 'J';
+  bool answer;
+  print('');
+  switch (answerStr) {
+    case 'N' || 'n':
+      answer = false;
+    case 'J' || 'j':
+    default:
+      answer = true;
+  }
+  return answer;
 }
 
 void clearTerminal() {
