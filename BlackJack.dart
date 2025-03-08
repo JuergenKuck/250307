@@ -158,9 +158,12 @@ int NextCard(
 void PrintCardsCurrent(int numberCard, int pointsSum, String actor,
     List<String> cards, List<String> suits, List<int> asses) {
   String printCards = "$actor (";
-  if (pointsSum < 10) printCards += ' ';
-  printCards += '$pointsSum Punkte): ';
-
+  if (IsBlackJack(cards, pointsSum)) {
+    printCards += 'BlackJack): ';
+  } else {
+    if (pointsSum < 10) printCards += ' ';
+    printCards += ' $pointsSum Punkte): ';
+  }
   for (int i = 0; i < cards.length; i++) {
     switch (suits[i]) {
       case '♦' || '♥':
