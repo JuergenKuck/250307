@@ -20,6 +20,14 @@ Map<String, int> rankMap = {
 
 List<String> suitSymbols = ['♦', '♥', '♠', '♣'];
 
+String colorRedWhite = '\x1B[31;47m'; // rot auf weiß
+String colorBlackWhite = '\x1B[30;47m'; // schwarz auf weiß
+String colorBlackGreen = '\x1B[37;42m'; // schwarz auf grün
+String colorBlackRed = '\x1B[37;41m'; // schwarz auf rot
+String colorBlackYellow = '\x1B[37;43m'; // schwarz auf gelb
+
+String colorEnd = '\x1B[0m';
+
 void main() {
   // BlackJack:
   bool isGame = true;
@@ -61,9 +69,9 @@ bool Game() {
   while (!isFold && !isPlayerLost) {
     playerPointsSum =
         NextCard(++playerNumberCard, playerCards, playerSuits, playerAsses);
-    PrintCardsCurrent(bankNumberCard, bankPointsSum, 'Bank   ', bankCards,
-        bankSuits, bankAsses);
-
+    PrintCardsCurrent(
+        bankNumberCard, bankPointsSum, 'Bank', bankCards, bankSuits, bankAsses);
+    print('');
     PrintCardsCurrent(playerNumberCard, playerPointsSum, 'Spieler', playerCards,
         playerSuits, playerAsses);
 
@@ -79,8 +87,9 @@ bool Game() {
       case > 21:
         isPlayerLost = true;
         PrintHeader('Spielende');
-        PrintCardsCurrent(bankNumberCard, bankPointsSum, 'Bank   ', bankCards,
+        PrintCardsCurrent(bankNumberCard, bankPointsSum, 'Bank', bankCards,
             bankSuits, bankAsses);
+        print('');
         PrintCardsCurrent(playerNumberCard, playerPointsSum, 'Spieler',
             playerCards, playerSuits, playerAsses);
         PrintLost("Du hast Dich überzogen!");
@@ -93,22 +102,32 @@ bool Game() {
     print('');
     bool isBankLost = false;
     while (!isFold && !isBankLost) {
+      PrintHeader("Die Bank zieht.");
+      PrintCardsCurrent(playerNumberCard, playerPointsSum, 'Spieler',
+          playerCards, playerSuits, playerAsses);
+      print('');
+      PrintCardsCurrent(bankNumberCard, bankPointsSum, 'Bank', bankCards,
+          bankSuits, bankAsses);
+
+      sleep(Duration(seconds: 1)); // Hält das Programm für 3 Sekunden an
       bankPointsSum =
           NextCard(++bankNumberCard, bankCards, bankSuits, bankAsses);
+
       isFold = bankPointsSum >= 17;
       isBankLost = bankPointsSum > 21;
     }
-    PrintHeader("Bank hat gezogen.");
-    PrintCardsCurrent(bankNumberCard, bankPointsSum, 'Bank   ', bankCards,
-        bankSuits, bankAsses);
+    PrintHeader("Die Bank hat gezogen.");
     PrintCardsCurrent(playerNumberCard, playerPointsSum, 'Spieler', playerCards,
         playerSuits, playerAsses);
+    print('');
+    PrintCardsCurrent(
+        bankNumberCard, bankPointsSum, 'Bank', bankCards, bankSuits, bankAsses);
 
     bool isPlayerBlackJack = IsBlackJack(playerCards, playerPointsSum);
     bool isBankBlackJack = IsBlackJack(bankCards, bankPointsSum);
 
     if (isBankLost)
-      PrintWin('Die Bank hat sich überzogen');
+      PrintWin('Die Bank hat sich überzogen!');
     else {
       if (playerPointsSum > bankPointsSum) {
         isBankLost = true;
@@ -124,11 +143,7 @@ bool Game() {
         PrintLost("Die Bank hat mit BlackJack gewonnen!");
       }
     }
-    if (!isPlayerLost && !isBankLost) {
-      PrintLine();
-      print("Noch mal gutgegangen! Ihr habt unentschieden gespielt!");
-      PrintLine();
-    }
+    if (!isPlayerLost && !isBankLost) printDraw();
   }
 
   return JaNein("Möchtest Du noch ein Spiel machen?");
@@ -157,28 +172,36 @@ int NextCard(
 
 void PrintCardsCurrent(int numberCard, int pointsSum, String actor,
     List<String> cards, List<String> suits, List<int> asses) {
-  String printCards = "$actor (";
-  if (IsBlackJack(cards, pointsSum)) {
-    printCards += 'BlackJack): ';
-  } else {
-    if (pointsSum < 10) printCards += ' ';
-    printCards += ' $pointsSum Punkte): ';
-  }
+  String actor1 = actor.length < 7 ? actor + '   ' : actor;
+  String printCards0 = "$actor1: ";
+  String printCards1 = '         ';
+  String printCards2 = '         ';
+  String color = '';
   for (int i = 0; i < cards.length; i++) {
     switch (suits[i]) {
       case '♦' || '♥':
-        printCards += '\x1B[31;47m'; // rot auf weiß
+        color = '\x1B[31;47m'; // rot auf weiß
       case '♠' || '♣':
-        printCards += '\x1B[30;47m'; // schwarz auf weiß
+        color = '\x1B[30;47m'; // schwarz auf weiß
     }
 
-    printCards += ' ${suits[i]} ${cards[i]} \x1B[0m';
-    if (i != cards.length - 1) {
-      //printCards += " + ";
-    }
+    // printCards += ' ${suits[i]} ${cards[i]} \x1B[0m';
+    String card = cards[i];
+    if (card.length == 1) card += ' ';
+    printCards0 += '$color ${suits[i]} ${suits[i]} $colorEnd ';
+    printCards1 += '$color  ${card} $colorEnd ';
+    printCards2 += '$color ${suits[i]} ${suits[i]} $colorEnd ';
   }
-  // printCards += " -> $pointsSum Punkte";
-  print(printCards);
+
+  if (IsBlackJack(cards, pointsSum)) {
+    printCards0 += '(BlackJack)';
+  } else {
+    printCards0 += '($pointsSum Punkte)';
+  }
+
+  print(printCards0);
+  print(printCards1);
+  print(printCards2);
 }
 
 int GetRandom(int nRandom) {
@@ -216,18 +239,29 @@ void PrintHeader(String header) {
 }
 
 void PrintLine() {
-  print('--------------------------------------------------------------------');
+  print(
+      '----------------------------------------------------------------------------');
 }
 
 void PrintWin(String text) {
+  sleep(Duration(seconds: 1)); // Hält das Programm für 1 Sekunden an
   PrintLine();
-  print('Herzlichen Glückwunsch, Du hast gewonnen! $text');
+  print('$colorBlackGreen Glückwunsch, Du hast gewonnen! $text $colorEnd');
   PrintLine();
 }
 
 void PrintLost(String text) {
+  sleep(Duration(seconds: 1)); // Hält das Programm für 1 Sekunden an
   PrintLine();
-  print('Schade Du hast verloren! $text');
+  print('$colorBlackRed Schade, Du hast verloren! $text $colorEnd');
+  PrintLine();
+}
+
+printDraw() {
+  sleep(Duration(seconds: 1)); // Hält das Programm für 1 Sekunden an
+  PrintLine();
+  print(
+      '$colorBlackYellow Noch mal gutgegangen! Ihr habt unentschieden gespielt!$colorEnd');
   PrintLine();
 }
 
