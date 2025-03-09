@@ -20,11 +20,11 @@ Map<String, int> rankMap = {
 
 List<String> suitSymbols = ['♦', '♥', '♠', '♣'];
 
-String colorRedWhite = '\x1B[31;47m'; // rot auf weiß
-String colorBlackWhite = '\x1B[30;47m'; // schwarz auf weiß
-String colorBlackGreen = '\x1B[37;42m'; // schwarz auf grün
-String colorBlackRed = '\x1B[37;41m'; // schwarz auf rot
-String colorBlackYellow = '\x1B[37;43m'; // schwarz auf gelb
+String colorRedWhite = '\x1B[1;31;47m'; // rot auf weiß
+String colorBlackWhite = '\x1B[1;30;47m'; // schwarz auf weiß
+String colorBlackGreen = '\x1B[1;97;42m'; // Dunkel auf grün
+String colorBlackRed = '\x1B[1;97;41m'; // weiß auf rot
+String colorBlackYellow = '\x1B[1;30;43m'; // dunkel auf gelb
 
 String colorEnd = '\x1B[0m';
 
@@ -143,7 +143,10 @@ bool Game() {
         PrintLost("Die Bank hat mit BlackJack gewonnen!");
       }
     }
-    if (!isPlayerLost && !isBankLost) printDraw();
+    if (!isPlayerLost && !isBankLost) PrintDraw();
+    // PrintWin('WinTest');
+    // PrintLost('WinTest');
+    // PrintDraw();
   }
 
   return JaNein("Möchtest Du noch ein Spiel machen?");
@@ -257,7 +260,7 @@ void PrintLost(String text) {
   PrintLine();
 }
 
-printDraw() {
+void PrintDraw() {
   sleep(Duration(seconds: 1)); // Hält das Programm für 1 Sekunden an
   PrintLine();
   print(
