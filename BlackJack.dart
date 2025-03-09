@@ -32,12 +32,12 @@ void main() {
   // BlackJack:
   bool isGame = true;
   while (isGame) {
-    isGame = Game();
+    isGame = blackjack();
   }
 }
 
-bool Game() {
-  PrintHeader('BlackJack - Spielbeginn');
+bool blackjack() {
+  printHeader('BlackJack - Spielbeginn');
 
   // Spieler Karten
   List<String> playerCards = [];
@@ -50,7 +50,7 @@ bool Game() {
 
   // Erste Karte Spieler
   int playerPointsSum =
-      NextCard(++playerNumberCard, playerCards, playerSuits, playerAsses);
+      nextCard(++playerNumberCard, playerCards, playerSuits, playerAsses);
 
   // Bank: Kommentare analog Spieler
   List<String> bankCards = [];
@@ -60,7 +60,7 @@ bool Game() {
 
   // Erste Karte Bank
   int bankPointsSum =
-      NextCard(++bankNumberCard, bankCards, bankSuits, bankAsses);
+      nextCard(++bankNumberCard, bankCards, bankSuits, bankAsses);
 
   // Spieler restliche Karten
   bool isFold = false;
@@ -68,31 +68,31 @@ bool Game() {
 
   while (!isFold && !isPlayerLost) {
     playerPointsSum =
-        NextCard(++playerNumberCard, playerCards, playerSuits, playerAsses);
-    PrintCardsCurrent(
+        nextCard(++playerNumberCard, playerCards, playerSuits, playerAsses);
+    printCardsCurrent(
         bankNumberCard, bankPointsSum, 'Bank', bankCards, bankSuits, bankAsses);
     print('');
-    PrintCardsCurrent(playerNumberCard, playerPointsSum, 'Spieler', playerCards,
+    printCardsCurrent(playerNumberCard, playerPointsSum, 'Spieler', playerCards,
         playerSuits, playerAsses);
 
     switch (playerPointsSum) {
       case < 21:
-        PrintLine();
-        isFold = !JaNein("Möchtest Du noch eine Karte ziehen?");
-        PrintLine();
-        if (!isFold) PrintHeader("Nächste Karte gezogen.");
+        printLine();
+        isFold = !jaNein("Möchtest Du noch eine Karte ziehen?");
+        printLine();
+        if (!isFold) printHeader("Nächste Karte gezogen.");
 
       case == 21:
         isFold = true; // bei 21 wirst Du keine mehr ziehen
       case > 21:
         isPlayerLost = true;
-        PrintHeader('Spielende');
-        PrintCardsCurrent(bankNumberCard, bankPointsSum, 'Bank', bankCards,
+        printHeader('Spielende');
+        printCardsCurrent(bankNumberCard, bankPointsSum, 'Bank', bankCards,
             bankSuits, bankAsses);
         print('');
-        PrintCardsCurrent(playerNumberCard, playerPointsSum, 'Spieler',
+        printCardsCurrent(playerNumberCard, playerPointsSum, 'Spieler',
             playerCards, playerSuits, playerAsses);
-        PrintLost("Du hast Dich überzogen!");
+        printLost("Du hast Dich überzogen!");
     }
   }
 
@@ -102,57 +102,57 @@ bool Game() {
     print('');
     bool isBankLost = false;
     while (!isFold && !isBankLost) {
-      PrintHeader("Die Bank zieht.");
-      PrintCardsCurrent(playerNumberCard, playerPointsSum, 'Spieler',
+      printHeader("Die Bank zieht.");
+      printCardsCurrent(playerNumberCard, playerPointsSum, 'Spieler',
           playerCards, playerSuits, playerAsses);
       print('');
-      PrintCardsCurrent(bankNumberCard, bankPointsSum, 'Bank', bankCards,
+      printCardsCurrent(bankNumberCard, bankPointsSum, 'Bank', bankCards,
           bankSuits, bankAsses);
 
       sleep(Duration(seconds: 1)); // Hält das Programm für 3 Sekunden an
       bankPointsSum =
-          NextCard(++bankNumberCard, bankCards, bankSuits, bankAsses);
+          nextCard(++bankNumberCard, bankCards, bankSuits, bankAsses);
 
       isFold = bankPointsSum >= 17;
       isBankLost = bankPointsSum > 21;
     }
-    PrintHeader("Die Bank hat gezogen.");
-    PrintCardsCurrent(playerNumberCard, playerPointsSum, 'Spieler', playerCards,
+    printHeader("Die Bank hat gezogen.");
+    printCardsCurrent(playerNumberCard, playerPointsSum, 'Spieler', playerCards,
         playerSuits, playerAsses);
     print('');
-    PrintCardsCurrent(
+    printCardsCurrent(
         bankNumberCard, bankPointsSum, 'Bank', bankCards, bankSuits, bankAsses);
 
-    bool isPlayerBlackJack = IsBlackJack(playerCards, playerPointsSum);
-    bool isBankBlackJack = IsBlackJack(bankCards, bankPointsSum);
+    bool isPlayerBlackJack = isBlackJack(playerCards, playerPointsSum);
+    bool isBankBlackJack = isBlackJack(bankCards, bankPointsSum);
 
     if (isBankLost)
-      PrintWin('Die Bank hat sich überzogen!');
+      printWin('Die Bank hat sich überzogen!');
     else {
       if (playerPointsSum > bankPointsSum) {
         isBankLost = true;
-        PrintWin('Du hast mehr Punkte als die Bank');
+        printWin('Du hast mehr Punkte als die Bank');
       } else if (playerPointsSum < bankPointsSum) {
         isPlayerLost = true;
-        PrintLost("Du hast weniger Punkte als die Bank!");
+        printLost("Du hast weniger Punkte als die Bank!");
       } else if (isPlayerBlackJack && !isBankBlackJack) {
         isBankLost = true;
-        PrintWin('Du hast mit BlackJack gewonnen!');
+        printWin('Du hast mit BlackJack gewonnen!');
       } else if (isBankBlackJack && !isPlayerBlackJack) {
         isPlayerLost = true;
-        PrintLost("Die Bank hat mit BlackJack gewonnen!");
+        printLost("Die Bank hat mit BlackJack gewonnen!");
       }
     }
-    if (!isPlayerLost && !isBankLost) PrintDraw();
+    if (!isPlayerLost && !isBankLost) printDraw();
     // PrintWin('WinTest');
     // PrintLost('WinTest');
     // PrintDraw();
   }
 
-  return JaNein("Möchtest Du noch ein Spiel machen?");
+  return jaNein("Möchtest Du noch ein Spiel machen?");
 }
 
-int NextCard(
+int nextCard(
     int numberCard, List<String> cards, List<String> suits, List<int> asses) {
   cards.add(rankMap.keys.elementAt(GetRandom(13)));
   suits.add(suitSymbols[GetRandom(4)]);
@@ -173,7 +173,7 @@ int NextCard(
   return pointsSum;
 }
 
-void PrintCardsCurrent(int numberCard, int pointsSum, String actor,
+void printCardsCurrent(int numberCard, int pointsSum, String actor,
     List<String> cards, List<String> suits, List<int> asses) {
   String actor1 = actor.length < 7 ? actor + '   ' : actor;
   String printCards0 = "$actor1: ";
@@ -196,7 +196,7 @@ void PrintCardsCurrent(int numberCard, int pointsSum, String actor,
     printCards2 += '$color ${suits[i]} ${suits[i]} $colorEnd ';
   }
 
-  if (IsBlackJack(cards, pointsSum)) {
+  if (isBlackJack(cards, pointsSum)) {
     printCards0 += '(BlackJack)';
   } else {
     printCards0 += '($pointsSum Punkte)';
@@ -213,11 +213,11 @@ int GetRandom(int nRandom) {
   return result;
 }
 
-bool IsBlackJack(List<String> cards, int pointsSum) {
+bool isBlackJack(List<String> cards, int pointsSum) {
   return cards.length == 2 && pointsSum == 21;
 }
 
-bool JaNein(String header) {
+bool jaNein(String header) {
   print('');
   print("$header 'J'a oder 'N'ein?");
 
@@ -234,38 +234,38 @@ bool JaNein(String header) {
   return answer;
 }
 
-void PrintHeader(String header) {
+void printHeader(String header) {
   clearTerminal();
-  PrintLine();
+  printLine();
   print(header);
-  PrintLine();
+  printLine();
 }
 
-void PrintLine() {
+void printLine() {
   print(
       '----------------------------------------------------------------------------');
 }
 
-void PrintWin(String text) {
+void printWin(String text) {
   sleep(Duration(seconds: 1)); // Hält das Programm für 1 Sekunden an
-  PrintLine();
+  printLine();
   print('$colorBlackGreen Glückwunsch, Du hast gewonnen! $text $colorEnd');
-  PrintLine();
+  printLine();
 }
 
-void PrintLost(String text) {
+void printLost(String text) {
   sleep(Duration(seconds: 1)); // Hält das Programm für 1 Sekunden an
-  PrintLine();
+  printLine();
   print('$colorBlackRed Schade, Du hast verloren! $text $colorEnd');
-  PrintLine();
+  printLine();
 }
 
-void PrintDraw() {
+void printDraw() {
   sleep(Duration(seconds: 1)); // Hält das Programm für 1 Sekunden an
-  PrintLine();
+  printLine();
   print(
       '$colorBlackYellow Noch mal gutgegangen! Ihr habt unentschieden gespielt!$colorEnd');
-  PrintLine();
+  printLine();
 }
 
 void clearTerminal() {
